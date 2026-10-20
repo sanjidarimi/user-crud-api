@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { UserService, isValidObjectId } from "./user.service.js";
 
-const createUser = async (req: Request, res: Response) => {
+const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, email, age } = req.body;
 
@@ -30,7 +30,10 @@ const createUser = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
       res.status(409).json({
         success: false,
         message: "A user with this email already exists.",
@@ -45,7 +48,7 @@ const createUser = async (req: Request, res: Response) => {
   }
 };
 
-const getAllUsers = async (_req: Request, res: Response) => {
+const getAllUsers = async (_req: Request, res: Response): Promise<void> => {
   try {
     const result = await UserService.getAllUsersFromDB();
 
@@ -62,9 +65,12 @@ const getAllUsers = async (_req: Request, res: Response) => {
   }
 };
 
-const getUserById = async (req: Request, res: Response) => {
+const getUserById = async (
+  req: Request<{ id: string }>,
+  res: Response,
+): Promise<void> => {
   try {
-    const { id } = req.params ;
+    const id = req.params.id as string;
 
     if (!isValidObjectId(id)) {
       res.status(400).json({
@@ -96,9 +102,12 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-const updateUser = async (req: Request, res: Response) => {
+const updateUser = async (
+  req: Request<{ id: string }>,
+  res: Response,
+): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { name, email, age } = req.body;
 
     if (!isValidObjectId(id)) {
@@ -112,12 +121,16 @@ const updateUser = async (req: Request, res: Response) => {
     if (name === undefined && email === undefined && age === undefined) {
       res.status(400).json({
         success: false,
-        message: "At least one field ('name', 'email', or 'age') must be provided to update.",
+        message:
+          "At least one field ('name', 'email', or 'age') must be provided to update.",
       });
       return;
     }
 
-    if (age !== undefined && (typeof age !== "number" || !Number.isInteger(age) || age < 0)) {
+    if (
+      age !== undefined &&
+      (typeof age !== "number" || !Number.isInteger(age) || age < 0)
+    ) {
       res.status(400).json({
         success: false,
         message: "Field 'age' must be a non-negative integer.",
@@ -157,9 +170,12 @@ const updateUser = async (req: Request, res: Response) => {
   }
 };
 
-const deleteUser = async (req: Request, res: Response) => {
+const deleteUser = async (
+  req: Request<{ id: string }>,
+  res: Response,
+): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     if (!isValidObjectId(id)) {
       res.status(400).json({
@@ -176,7 +192,10 @@ const deleteUser = async (req: Request, res: Response) => {
       message: "User deleted successfully",
     });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
       res.status(404).json({
         success: false,
         message: "User not found",

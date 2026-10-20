@@ -46,7 +46,7 @@ tmp/
 temp/
 
 # Prisma generated files (if generated locally)
-# node_modules/.prisma/
+node_modules/.prisma/
 .agents
 .claude
 .cursor
